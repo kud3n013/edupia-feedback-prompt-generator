@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 4. Construct the Prompt
         const promptText = `
-Hãy đóng vai trò là một giáo viên tiếng Anh tận tâm và chuyên nghiệp. Dựa trên thông tin dưới đây, hãy viết một đoạn nhận xét ngắn gọn, súc tích (khoảng 150-200 chữ) bằng tiếng Việt dành cho phụ huynh của học sinh.
+Hãy đóng vai trò là một giáo viên tiếng Anh nghiêm khắc và chuyên nghiệp. Dựa trên thông tin dưới đây, hãy viết một đoạn nhận xét ngắn gọn, súc tích (khoảng 150-200 chữ) bằng tiếng Việt dành cho phụ huynh của học sinh.
 
 Thông tin học sinh:
 - Tên: ${studentName}
@@ -104,12 +104,14 @@ Thái độ học tập:
 ${attitudeItems.length > 0 ? attitudeItems.map(a => `- ${a}`).join('\n') : '- (Không ghi nhận đặc biệt)'}
 
 Yêu cầu output:
-1. Viết thành 2 phần nội dung chính: "Tiếp thu kiến thức" và "Thái độ học tập". Mỗi phần là một đoạn văn liền mạch.
-2. Ngôn ngữ: Tiếng Việt, giọng văn khuyến khích, nhẹ nhàng nhưng rõ ràng.
-3. Xưng hô: Gọi học sinh là "em" hoặc "${studentName}".
-4. KHÔNG liệt kê điểm số cụ thể (ví dụ: không viết "8/10") trong bài nhận xét. Chỉ dùng điểm số để định lượng mức độ khen/góp ý (ví dụ: điểm cao thì khen nắm chắc, điểm thấp thì nhắc nhở cần ôn luyện).
-5. Đặt phần "Tiếp thu kiến thức" vào trong một block code markdown.
-6. Đặt phần "Thái độ học tập" vào trong một block code markdown riêng biệt thứ hai.
+1. Viết 2 đoạn nhận xét riêng biệt cho "Tiếp thu kiến thức" và "Thái độ học tập".
+2. Ngôn ngữ: Tiếng Việt, giọng văn thẳng thắn, khách quan, đi thẳng vào vấn đề.
+3. TUYỆT ĐỐI KHÔNG có lời chào đầu thư (như "Chào phụ huynh", "Gửi gia đình"...).
+4. TUYỆT ĐỐI KHÔNG có lời khen ngợi sáo rỗng hay động viên cuối thư (như "Cố gắng phát huy", "Chúc em học tốt"...). Chỉ tập trung vào nhận xét năng lực thực tế.
+5. Xưng hô: Gọi học sinh là "em" hoặc "${studentName}".
+6. KHÔNG liệt kê điểm số cụ thể (ví dụ: không viết "8/10") trong bài nhận xét. Chỉ dùng điểm số để định lượng mức độ nhận xét.
+7. Đặt nội dung nhận xét "Tiếp thu kiến thức" vào trong block code markdown đầu tiên. LƯU Ý: Chỉ xuất ra nội dung text thuần túy, KHÔNG bao gồm tiêu đề (như "Tiếp thu kiến thức").
+8. Đặt nội dung nhận xét "Thái độ học tập" vào trong block code markdown thứ hai. LƯU Ý: Chỉ xuất ra nội dung text thuần túy, KHÔNG bao gồm tiêu đề (như "Thái độ học tập").
 `.trim();
 
         // 5. Display Result
