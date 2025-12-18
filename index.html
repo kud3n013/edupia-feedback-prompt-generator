@@ -20,28 +20,6 @@
             <header>
                 <div class="header-content">
                     <h1>Edupia Feedback Prompt Generator</h1>
-                    <button id="themeToggle" class="btn-icon" aria-label="Toggle Dark Mode">
-                        <!-- Sun Icon -->
-                        <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="5"></circle>
-                            <line x1="12" y1="1" x2="12" y2="3"></line>
-                            <line x1="12" y1="21" x2="12" y2="23"></line>
-                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                            <line x1="1" y1="12" x2="3" y2="12"></line>
-                            <line x1="21" y1="12" x2="23" y2="12"></line>
-                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                        </svg>
-                        <!-- Moon Icon -->
-                        <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                        </svg>
-                    </button>
                 </div>
                 <p id="pageDescription">Tạo prompt phản hồi nhanh chóng và chuyên nghiệp</p>
             </header>
@@ -287,44 +265,57 @@
             <div id="page-lesson-feedback" class="page-section hidden">
                 <form id="lessonFeedbackForm">
                     <section class="card">
-                        <h2>Thông tin buổi học</h2>
-                        <div class="form-group">
-                            <label for="lessonName">Tên/Chủ đề bài học</label>
-                            <input type="text" id="lessonName" placeholder="Ví dụ: Unit 5: Animals" required>
+                        <h2>1. Thông tin buổi học</h2>
+
+                        <!-- Row 1: Atmosphere -->
+                        <div class="feedback-row form-group">
+                            <label class="checkbox-wrapper">
+                                <input type="checkbox" id="checkAtmosphere" checked>
+                                <span class="checkmark"></span>
+                            </label>
+                            <label for="selectAtmosphere" class="inline-label">Không khí lớp học</label>
+                            <select id="selectAtmosphere" class="form-select">
+                                <option value="Sôi nổi" selected>Sôi nổi</option>
+                                <option value="Trầm lặng">Trầm lặng</option>
+                            </select>
                         </div>
-                        <div class="form-group">
-                            <label for="lessonSummary">Nội dung đã dạy</label>
-                            <textarea id="lessonSummary" rows="4"
-                                placeholder="Tóm tắt các phần đã dạy trong buổi học..." required></textarea>
+
+                        <!-- Row 2: Lesson Progress -->
+                        <div class="feedback-row form-group">
+                            <label class="checkbox-wrapper">
+                                <input type="checkbox" id="checkProgress" checked>
+                                <span class="checkmark"></span>
+                            </label>
+                            <label for="selectProgress" class="inline-label">Buổi học diễn ra</label>
+                            <select id="selectProgress" class="form-select">
+                                <option value="Bình thường" selected>Bình thường</option>
+                                <option value="Trễ">Trễ</option>
+                                <option value="Sớm">Sớm</option>
+                            </select>
+                        </div>
+
+                        <!-- Row 3: Late Students -->
+                        <div class="feedback-row form-group">
+                            <label class="checkbox-wrapper">
+                                <input type="checkbox" id="checkLate">
+                                <span class="checkmark"></span>
+                            </label>
+                            <label for="inputLate" class="inline-label">Bạn vào muộn</label>
+                            <input type="text" id="inputLate" placeholder="Tên học sinh...">
                         </div>
                     </section>
 
                     <section class="card">
-                        <h2>Đánh giá chung</h2>
-                        <div class="form-group">
-                            <label>Thái độ chung của lớp</label>
-                            <div class="checkbox-grid">
-                                <label class="pill-checkbox positive"><input type="radio" name="classAttitude"
-                                        value="Rất tích cực" checked><span>Rất tích cực</span></label>
-                                <label class="pill-checkbox positive"><input type="radio" name="classAttitude"
-                                        value="Tích cực"><span>Tích cực</span></label>
-                                <label class="pill-checkbox"><input type="radio" name="classAttitude"
-                                        value="Bình thường"><span>Bình thường</span></label>
-                                <label class="pill-checkbox negative"><input type="radio" name="classAttitude"
-                                        value="Hơi trầm"><span>Hơi trầm</span></label>
-                                <label class="pill-checkbox negative"><input type="radio" name="classAttitude"
-                                        value="Mất trật tự"><span>Mất trật tự</span></label>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="improvementAreas">Điểm cần cải thiện (chung)</label>
-                            <textarea id="improvementAreas" rows="3"
-                                placeholder="Ví dụ: Cần chú ý phát âm ending sounds..."></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="nextLessonPlan">Kế hoạch bài tiếp theo</label>
-                            <textarea id="nextLessonPlan" rows="2"
-                                placeholder="Ví dụ: Ôn tập Unit 5, kiểm tra từ vựng..."></textarea>
+                        <h2>2. Nhắc nhở phụ huynh</h2>
+                        <label class="section-desc">PH nhớ nhắc các em hoàn thành:</label>
+
+                        <div class="checkbox-grid">
+                            <label class="pill-checkbox"><input type="checkbox" name="reminder"
+                                    value="BTVN"><span>BTVN</span></label>
+                            <label class="pill-checkbox"><input type="checkbox" name="reminder"
+                                    value="Bài thi tháng"><span>Bài thi tháng</span></label>
+                            <label class="pill-checkbox"><input type="checkbox" name="reminder"
+                                    value="Bài tập nói"><span>Bài tập nói</span></label>
                         </div>
                     </section>
 
@@ -339,7 +330,7 @@
                             </svg>
                             Làm mới
                         </button>
-                        <button type="button" id="lessonGenerateBtn" class="btn primary">Generate Lesson Report</button>
+                        <button type="button" id="lessonGenerateBtn" class="btn primary">Tạo Feedback</button>
                     </div>
                 </form>
 
@@ -374,6 +365,15 @@
                 </svg>
                 <span class="nav-label">Buổi học</span>
             </button>
+
+            <!-- Theme Toggle in Sidebar -->
+            <div class="nav-item theme-switch-container" title="Chế độ tối/sáng">
+                <label class="switch">
+                    <input type="checkbox" id="themeToggleCheckbox">
+                    <span class="slider round"></span>
+                </label>
+                <span class="nav-label">Giao diện</span>
+            </div>
         </nav>
     </div>
 

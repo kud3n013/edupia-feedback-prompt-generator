@@ -1,0 +1,120 @@
+/* New Feedback Row Styles */
+.feedback-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.feedback-row .checkbox-wrapper {
+    min-width: auto;
+    margin-bottom: 0;
+}
+
+.feedback-row .inline-label {
+    margin-bottom: 0;
+    white-space: nowrap;
+    min-width: 140px;
+}
+
+.feedback-row input[type="text"] {
+    flex: 1;
+}
+
+@media (max-width: 600px) {
+    .feedback-row {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .feedback-row .inline-label {
+        width: 100%;
+        min-width: auto;
+    }
+
+    .feedback-row input[type="text"] {
+        width: 100%;
+    }
+}
+
+/* Toggle Switch Styles */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    /* Light mode off */
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked+.slider {
+    background-color: var(--primary-color);
+}
+
+input:focus+.slider {
+    box-shadow: 0 0 1px var(--primary-color);
+}
+
+input:checked+.slider:before {
+    -webkit-transform: translateX(20px);
+    -ms-transform: translateX(20px);
+    transform: translateX(20px);
+}
+
+/* Rounded sliders */
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+.theme-switch-container {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    width: 100%;
+    /* Ensure it centers */
+}
+
+/* Ensure data-theme dark specific adjustments if needed */
+[data-theme="dark"] .slider {
+    background-color: #374151;
+    /* Darker grey when off in dark mode? Or simply rely on checked state */
+}
+
+[data-theme="dark"] input:checked+.slider {
+    background-color: var(--primary-color);
+}

@@ -4,41 +4,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyBtn = document.getElementById('copyBtn');
     const promptOutput = document.getElementById('promptOutput');
     const outputSection = document.getElementById('outputSection');
-    const themeToggle = document.getElementById('themeToggle');
-    const refreshBtn = document.getElementById('refreshBtn');
 
-    // New Lesson Feedback Elements
-    const lessonGenerateBtn = document.getElementById('lessonGenerateBtn');
-    const lessonCopyBtn = document.getElementById('lessonCopyBtn');
-    const lessonPromptOutput = document.getElementById('lessonPromptOutput');
-    const lessonOutputSection = document.getElementById('lessonOutputSection');
-    const lessonRefreshBtn = document.getElementById('lessonRefreshBtn');
-
-    // Navigation Elements
+    // Navigation & Page Elements
     const navItems = document.querySelectorAll('.nav-item');
     const pageSections = document.querySelectorAll('.page-section');
     const pageDescription = document.getElementById('pageDescription');
 
+    // Student Feedback Elements
+    const refreshBtn = document.getElementById('refreshBtn');
+
+    // Lesson Feedback Elements
+    const lessonRefreshBtn = document.getElementById('lessonRefreshBtn');
+    const lessonGenerateBtn = document.getElementById('lessonGenerateBtn');
+    const lessonCopyBtn = document.getElementById('lessonCopyBtn');
+    const lessonOutputSection = document.getElementById('lessonOutputSection');
+    const lessonPromptOutput = document.getElementById('lessonPromptOutput');
+
     // Theme Toggle Logic
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const themeCheckbox = document.getElementById('themeToggleCheckbox');
 
     if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
         document.documentElement.setAttribute('data-theme', 'dark');
+        if (themeCheckbox) themeCheckbox.checked = true;
     }
 
-    themeToggle.addEventListener('click', () => {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-    });
+    if (themeCheckbox) {
+        themeCheckbox.addEventListener('change', (e) => {
+            const newTheme = e.target.checked ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+    }
 
     // --- Navigation Logic ---
     navItems.forEach(item => {
         item.addEventListener('click', () => {
             const targetId = item.getAttribute('data-target');
+            if (!targetId) return;
 
             // Update Active Nav Item
             navItems.forEach(nav => nav.classList.remove('active'));
@@ -152,14 +156,17 @@ Yêu cầu output:
 
     lessonRefreshBtn.addEventListener('click', () => {
         if (confirm('Bạn có chắc chắn muốn làm mới tất cả thông tin buổi học?')) {
-            document.getElementById('lessonName').value = '';
-            document.getElementById('lessonSummary').value = '';
-            document.getElementById('improvementAreas').value = '';
-            document.getElementById('nextLessonPlan').value = '';
+            document.getElementById('checkAtmosphere').checked = true;
+            document.getElementById('selectAtmosphere').value = 'Sôi nổi';
 
-            // Reset radio to first option (Rất tích cực)
-            const firstRadio = document.querySelector('input[name="classAttitude"][value="Rất tích cực"]');
-            if (firstRadio) firstRadio.checked = true;
+            document.getElementById('checkProgress').checked = true;
+            document.getElementById('selectProgress').value = 'Bình thường';
+
+            document.getElementById('checkLate').checked = false;
+            document.getElementById('inputLate').value = '';
+
+            const reminderCheckboxes = document.querySelectorAll('input[name="reminder"]');
+            reminderCheckboxes.forEach(cb => cb.checked = false);
 
             lessonOutputSection.classList.add('hidden');
             lessonPromptOutput.textContent = '';
@@ -170,45 +177,64 @@ Yêu cầu output:
     lessonCopyBtn.addEventListener('click', () => copyToClipboard(lessonPromptOutput, lessonCopyBtn));
 
     function generateLessonFeedback() {
-        const lessonName = document.getElementById('lessonName').value.trim();
-        const lessonSummary = document.getElementById('lessonSummary').value.trim();
-        const improvementAreas = document.getElementById('improvementAreas').value.trim();
-        const nextLessonPlan = document.getElementById('nextLessonPlan').value.trim();
+        // Part 1: General Info
+        let sentences = [];
 
-        let classAttitude = "Bình thường";
-        const attitudeRadio = document.querySelector('input[name="classAttitude"]:checked');
-        if (attitudeRadio) {
-            classAttitude = attitudeRadio.value;
+        // Atmosphere Mapping
+        const atmosphereMap = {
+            'Sôi nổi': 'sôi nổi, các con hào hứng phát biểu xây dựng bài',
+            'Trầm lặng': 'hơi trầm, các con cần tương tác nhiều hơn'
+        };
+
+        // Progress Mapping
+        const progressMap = {
+            'Bình thường': 'tốt đẹp, các con đều hiểu bài',
+            'Trễ': 'kết thúc muộn hơn dự kiến một chút',
+            'Sớm': 'kết thúc sớm hơn dự kiến'
+        };
+
+        // Atmosphere
+        if (document.getElementById('checkAtmosphere').checked) {
+            const val = document.getElementById('selectAtmosphere').value;
+            const text = atmosphereMap[val] || val;
+            sentences.push(`Không khí lớp học ${text}`);
         }
 
-        if (!lessonName || !lessonSummary) {
-            alert('Vui lòng nhập Tên bài học và Nội dung đã dạy!');
+        // Progress
+        if (document.getElementById('checkProgress').checked) {
+            const val = document.getElementById('selectProgress').value;
+            const text = progressMap[val] || val;
+            sentences.push(`Buổi học diễn ra ${text}`);
+        }
+
+        // Late
+        if (document.getElementById('checkLate').checked) {
+            const val = document.getElementById('inputLate').value.trim();
+            if (val) sentences.push(`Bạn ${val} vào muộn`);
+        }
+
+        let part1Text = "";
+        if (sentences.length > 0) {
+            part1Text = "1. " + sentences.join(". ") + ".";
+        }
+
+        // Part 2: Reminders
+        let part2Text = "";
+        const reminderCheckboxes = document.querySelectorAll('input[name="reminder"]:checked');
+        if (reminderCheckboxes.length > 0) {
+            const reminders = Array.from(reminderCheckboxes).map(cb => cb.value).join(", ");
+            part2Text = `2. PH nhớ nhắc các em hoàn thành ${reminders}.`;
+        }
+
+        // Combine
+        const finalOutput = [part1Text, part2Text].filter(t => t).join("\n\n");
+
+        if (!finalOutput) {
+            alert('Vui lòng chọn ít nhất một thông tin để tạo feedback!');
             return;
         }
 
-        const promptText = `
-Hãy đóng vai trò là một giáo viên tiếng Anh chuyên nghiệp. Dựa trên thông tin dưới đây, hãy viết một báo cáo tổng kết buổi học (Lesson Report) gửi cho phụ huynh/nhà trường.
-
-Thông tin buổi học:
-- Chủ đề/Bài học: ${lessonName}
-- Nội dung đã dạy: ${lessonSummary}
-
-Đánh giá lớp học:
-- Thái độ chung của lớp: ${classAttitude}
-- Điểm cần cải thiện: ${improvementAreas || "Không có ghi chú đặc biệt"}
-
-Kế hoạch tiếp theo:
-- ${nextLessonPlan || "Theo giáo trình"}
-
-Yêu cầu output:
-1. Viết một báo cáo ngắn gọn, chuyên nghiệp, súc tích (khoảng 200-250 chữ).
-2. Chia thành 3 phần rõ ràng: "Nội dung đã học", "Nhận xét lớp học" (bao gồm thái độ và điểm cần cải thiện), và "Dặn dò/Kế hoạch tới".
-3. Giọng văn: Trang trọng, khách quan, mang tính xây dựng.
-4. Ngôn ngữ: Tiếng Việt.
-5. Định dạng: Markdown, sử dụng bullet points cho các ý chính để dễ đọc.
-`.trim();
-
-        lessonPromptOutput.textContent = promptText;
+        lessonPromptOutput.textContent = finalOutput;
         lessonOutputSection.classList.remove('hidden');
         lessonOutputSection.scrollIntoView({ behavior: 'smooth' });
     }
