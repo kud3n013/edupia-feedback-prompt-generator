@@ -670,7 +670,9 @@ input:checked+.slider:before {
     justify-content: center;
     gap: 5px;
     width: 100%;
-    /* Ensure it centers */
+    /* Ensure it centers and fits content */
+    height: auto;
+    padding: 10px 0;
 }
 
 /* Ensure data-theme dark specific adjustments if needed */
@@ -681,4 +683,18 @@ input:checked+.slider:before {
 
 [data-theme="dark"] input:checked+.slider {
     background-color: var(--primary-color);
+}
+
+/* Theme Icon Toggle */
+.theme-icon {
+    font-size: 1.2rem !important;
+    /* Override .nav-label small font */
+}
+
+.theme-icon::before {
+    content: "☀️";
+}
+
+[data-theme="dark"] .theme-icon::before {
+    content: "🌙";
 }
