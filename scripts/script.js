@@ -218,7 +218,7 @@ function copyToClipboard(element, button) {
 // Data / Config
 // Data / Config
 const MAX_STUDENTS = 6;
-const CRITERIA_LIST = ['Từ vựng', 'Ngữ pháp', 'Phát âm', 'Ngữ âm', 'Đọc hiểu', 'Nghe hiểu', 'Phản xạ'];
+const CRITERIA_LIST = ['Từ vựng', 'Ngữ pháp', 'Ngữ âm', 'Đọc hiểu', 'Nghe hiểu', 'Phản xạ', 'Phát âm'];
 const ATTITUDE_DATA = {
     'Năng lượng / Tinh thần': ['tích cực', 'sôi nổi', 'vui vẻ', 'hứng thú', 'tự tin', 'lạc quan', 'mệt mỏi', 'chán nản', 'trầm tính', 'tự ti', 'xấu hổ', 'ngại nói'],
     'Khả năng tập trung': ['tập trung nghe giảng', 'chú ý bài học', 'tích cực phát biểu', 'sao nhãng', 'làm việc riêng', 'không tập trung', 'lơ là'],
@@ -610,7 +610,58 @@ function renderGroupAttitude() {
     }
 }
 
-// (Removed static name listeners as they are now dynamic in renderStudentInputs)
+// Refresh Button Logic
+groupFabRefresh.addEventListener('click', () => {
+    if (confirm('Bạn có chắc chắn muốn làm mới tất cả thông tin nhóm (bao gồm nội dung bài học và danh sách học sinh)?')) {
+        try {
+            console.log("Refreshing group data...");
+
+            // 1. Clear Lesson Content
+            const lessonInput = document.getElementById('groupLessonContent');
+            if (lessonInput) lessonInput.value = '';
+
+            // 2. Reset State
+            groupState.students = Array.from({ length: MAX_STUDENTS }, () => ({
+                name: '',
+                scores: {},
+                attitudes: []
+            }));
+
+            // Reset Student Count to default 4 for consistency
+            groupState.studentCount = 4;
+            const countInput = document.getElementById('studentCountInput');
+            const countDisplay = document.getElementById('studentCountDisplay');
+            if (countInput) countInput.value = 4;
+            if (countDisplay) countDisplay.textContent = 4;
+            if (navBadge) navBadge.textContent = 4;
+
+            // Re-initialize scores to default 8
+            groupState.students.forEach(s => {
+                CRITERIA_LIST.forEach(c => s.scores[c] = 8);
+            });
+
+            // Reset included criteria/attitudes to defaults if needed? 
+            // Keeping them as is or resetting matches user expectation of "Full Reset".
+            // Let's reset them too to be safe.
+            groupState.includedCriteria = ['Từ vựng', 'Ngữ pháp', 'Phản xạ'];
+            groupState.includedAttitudeCategories = Object.keys(ATTITUDE_DATA);
+
+            // 3. Clear Output
+            groupPromptOutput.textContent = '';
+            groupOutputSection.classList.add('hidden');
+
+            // 4. Re-render UI
+            renderStudentInputs();
+            renderGroupKnowledge();
+            renderGroupAttitude();
+
+            console.log("Refresh complete.");
+        } catch (err) {
+            console.error("Error during refresh:", err);
+            alert("Có lỗi xảy ra khi làm mới: " + err.message);
+        }
+    }
+});
 
 
 // Generate
