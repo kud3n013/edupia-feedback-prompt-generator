@@ -166,13 +166,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Shared Utilities ---
 
 
+
     // Apply to existing static sliders
     document.querySelectorAll('input[type="range"]').forEach(attachSliderWheelEvent);
 
+    // Auto-expand textarea logic
+    const autoExpandTextareas = document.querySelectorAll('.auto-expand');
+    autoExpandTextareas.forEach(textarea => {
+        textarea.addEventListener('input', autoResizeTextarea);
+        // Initial resize in case of content
+        autoResizeTextarea({ target: textarea });
+    });
 
 });
 
 // --- Shared Utilities (Global) ---
+function autoResizeTextarea(e) {
+    const textarea = e.target;
+    textarea.style.height = 'auto'; // Reset height to calculate scrollHeight
+    textarea.style.height = textarea.scrollHeight + 'px';
+}
 function attachSliderWheelEvent(slider) {
     const container = slider.parentElement;
     if (container) {
@@ -231,6 +244,7 @@ let groupState = {
     studentCount: 4,
     knowledgeMode: 'individual', // 'bulk' or 'individual'
     attitudeMode: 'individual',
+    schoolLevel: 'TH', // 'TH' or 'THCS'
     marketingName: '', // Not used yet but good to have
     students: Array.from({ length: MAX_STUDENTS }, () => ({
         name: '',
@@ -338,6 +352,16 @@ document.querySelectorAll('input[name="know_mode"]').forEach(r => {
 
 document.querySelectorAll('input[name="att_mode"]').forEach(r => {
     r.addEventListener('change', handleAttitudeToggle);
+});
+
+// School Level Toggle
+document.querySelectorAll('input[name="school_level"]').forEach(r => {
+    r.addEventListener('change', (e) => {
+        if (e.target.checked) {
+            groupState.schoolLevel = e.target.value;
+            console.log("School Level changed to:", groupState.schoolLevel);
+        }
+    });
 });
 
 // Render Functions
@@ -645,6 +669,11 @@ groupFabRefresh.addEventListener('click', () => {
             // Let's reset them too to be safe.
             groupState.includedCriteria = ['Từ vựng', 'Ngữ pháp', 'Phản xạ'];
             groupState.includedAttitudeCategories = Object.keys(ATTITUDE_DATA);
+            groupState.schoolLevel = 'TH'; // Reset to default
+
+            // Reset UI for school level
+            const levelTh = document.getElementById('level_th');
+            if (levelTh) levelTh.checked = true;
 
             // 3. Clear Output
             groupPromptOutput.textContent = '';
@@ -677,6 +706,10 @@ groupGenerateBtn.addEventListener('click', () => {
     // (Previous DOM query is removed)
 
     const prompts = [];
+    const pronoun = groupState.schoolLevel === 'THCS' ? 'em' : 'con';
+    const pronounInstruction = groupState.schoolLevel === 'THCS'
+        ? "Dùng đại từ 'em' để gọi học sinh."
+        : "Dùng đại từ 'con' để gọi học sinh.";
 
     // Generate only for current count
     for (let idx = 0; idx < groupState.studentCount; idx++) {
@@ -697,7 +730,8 @@ groupGenerateBtn.addEventListener('click', () => {
         const prompt = `
 ### Feedback cho học sinh: ${name}
 
-Hãy đóng vai trò là một giáo viên tiếng Anh nghiêm khắc và chuyên nghiệp. Dựa trên thông tin dưới đây, hãy viết một đoạn nhận xét ngắn gọn, súc tích (khoảng 100-150 chữ) bằng tiếng Việt dành cho phụ huynh.
+Hãy đóng vai trò là một giáo viên tiếng Anh thân thiện, nhẹ nhàng và chuyên nghiệp. Dựa trên thông tin dưới đây, hãy viết một đoạn nhận xét ngắn gọn (khoảng 50-100 chữ) bằng tiếng Việt dành cho phụ huynh. Sử dụng từ ngữ đơn giản, dễ hiểu, tránh dùng từ chuyên ngành khó hiểu.
+${pronounInstruction}
 
 Thông tin:
 - Tên: ${name}
@@ -709,7 +743,7 @@ ${criteriaText}
 Thái độ:
 ${attitudeText}
 
-Yêu cầu output (Nghiêm khắc, khách quan, KHÔNG chào hỏi/động viên sáo rỗng, TUYỆT ĐỐI KHÔNG nhắc đến điểm số):
+Yêu cầu output (Thân thiện, nhẹ nhàng, từ ngữ đơn giản, KHÔNG chào hỏi/động viên sáo rỗng, TUYỆT ĐỐI KHÔNG nhắc đến điểm số):
 1. **Tiếp thu kiến thức**:
 \`\`\`plaintext
 [Nội dung nhận xét kiến thức cho ${name}]

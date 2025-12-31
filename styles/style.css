@@ -283,6 +283,13 @@ select:focus {
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
 }
 
+.auto-expand {
+    resize: none;
+    overflow: hidden;
+    min-height: 3rem;
+    /* Approx. 2 rows based on existing font/padding */
+}
+
 .form-select {
     width: 100%;
     padding: 0.75rem;

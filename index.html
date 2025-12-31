@@ -33,14 +33,25 @@
                         <h2>Thông tin chung</h2>
                         <div class="form-group">
                             <label for="groupLessonContent">Nội dung bài học</label>
-                            <textarea id="groupLessonContent" rows="2" placeholder="Ví dụ: Unit 5: Animals..."
-                                required></textarea>
+                            <textarea id="groupLessonContent" class="auto-expand" rows="2"
+                                placeholder="Ví dụ: Unit 5: Animals..." required></textarea>
                         </div>
                     </section>
 
                     <!-- Student Info -->
                     <section class="card">
-                        <h2>Danh sách học sinh</h2>
+                        <div class="section-header-row">
+                            <h2>Danh sách học sinh</h2>
+                            <div class="toggle-container">
+                                <span class="toggle-label">Cấp học:</span>
+                                <div class="switch-toggle">
+                                    <input type="radio" id="level_th" name="school_level" value="TH" checked>
+                                    <label for="level_th">TH</label>
+                                    <input type="radio" id="level_thcs" name="school_level" value="THCS">
+                                    <label for="level_thcs">THCS</label>
+                                </div>
+                            </div>
+                        </div>
                         <div class="form-group" style="margin-bottom: 2rem;">
                             <div class="feedback-row" style="margin-bottom: 0.5rem;">
                                 <label for="studentCountInput" style="margin-bottom: 0;">Số lượng học sinh:</label>
