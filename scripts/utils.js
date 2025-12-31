@@ -1,20 +1,43 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- Theme Toggle Logic ---
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    // --- Theme Toggle Logic ---
     const themeCheckbox = document.getElementById('themeToggleCheckbox');
 
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        if (themeCheckbox) themeCheckbox.checked = true;
+    function applyTheme(isDark) {
+        if (isDark) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            if (themeCheckbox) themeCheckbox.checked = true;
+        } else {
+            document.documentElement.setAttribute('data-theme', 'light');
+            if (themeCheckbox) themeCheckbox.checked = false;
+        }
     }
 
+    // 1. Check for saved user preference
+    const savedTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+
+    // Initial Apply
+    if (savedTheme) {
+        applyTheme(savedTheme === 'dark');
+    } else {
+        applyTheme(systemDark.matches);
+    }
+
+    // 2. Listen for System Changes (only if no user preference is saved)
+    systemDark.addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) {
+            applyTheme(e.matches);
+        }
+    });
+
+    // 3. User Manual Toggle
     if (themeCheckbox) {
         themeCheckbox.addEventListener('change', (e) => {
-            const newTheme = e.target.checked ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
+            const isDark = e.target.checked;
+            applyTheme(isDark);
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
         });
     }
 
