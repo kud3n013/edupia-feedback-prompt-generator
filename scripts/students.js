@@ -1,124 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- Navigation & Page Elements ---
-    // (Only defined if sidebar exists - pages/students.html and pages/lesson.html have them)
-    const pageDescription = document.getElementById('pageDescription');
-
-    // --- Theme Toggle Logic ---
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const themeCheckbox = document.getElementById('themeToggleCheckbox');
-
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        if (themeCheckbox) themeCheckbox.checked = true;
-    }
-
-    if (themeCheckbox) {
-        themeCheckbox.addEventListener('change', (e) => {
-            const newTheme = e.target.checked ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-        });
-    }
-
-
-    // --- Lesson Feedback Logic ---
-    const lessonGenerateBtn = document.getElementById('lessonGenerateBtn');
-    if (lessonGenerateBtn) {
-        const lessonFabRefresh = document.getElementById('lessonFabRefresh');
-        const lessonCopyBtn = document.getElementById('lessonCopyBtn');
-        const lessonOutputSection = document.getElementById('lessonOutputSection');
-        const lessonPromptOutput = document.getElementById('lessonPromptOutput');
-
-        if (lessonFabRefresh) {
-            lessonFabRefresh.addEventListener('click', () => {
-                if (confirm('Bạn có chắc chắn muốn làm mới tất cả thông tin buổi học?')) {
-                    document.getElementById('checkAtmosphere').checked = true;
-                    document.getElementById('selectAtmosphere').value = 'Sôi nổi';
-                    document.getElementById('checkProgress').checked = true;
-                    document.getElementById('selectProgress').value = 'Bình thường';
-                    document.getElementById('checkLate').checked = false;
-                    document.getElementById('inputLate').value = '';
-                    const reminderCheckboxes = document.querySelectorAll('input[name="reminder"]');
-                    reminderCheckboxes.forEach(cb => cb.checked = false);
-                    lessonOutputSection.classList.add('hidden');
-                    lessonPromptOutput.textContent = '';
-                }
-            });
-        }
-
-        lessonGenerateBtn.addEventListener('click', () => {
-            // Part 1: General Info
-            let sentences = [];
-
-            // Atmosphere Mapping
-            const atmosphereMap = {
-                'Sôi nổi': 'sôi nổi, các con hào hứng phát biểu xây dựng bài',
-                'Trầm lặng': 'hơi trầm, các con cần tương tác nhiều hơn'
-            };
-
-            // Progress Mapping
-            const progressMap = {
-                'Bình thường': 'tốt đẹp, các con đều hiểu bài',
-                'Trễ': 'kết thúc muộn hơn dự kiến một chút',
-                'Sớm': 'kết thúc sớm hơn dự kiến'
-            };
-
-            // Atmosphere
-            if (document.getElementById('checkAtmosphere').checked) {
-                const val = document.getElementById('selectAtmosphere').value;
-                const text = atmosphereMap[val] || val;
-                sentences.push(`Không khí lớp học ${text}`);
-            }
-
-            // Progress
-            if (document.getElementById('checkProgress').checked) {
-                const val = document.getElementById('selectProgress').value;
-                const text = progressMap[val] || val;
-                sentences.push(`Buổi học diễn ra ${text}`);
-            }
-
-            // Late
-            if (document.getElementById('checkLate').checked) {
-                const val = document.getElementById('inputLate').value.trim();
-                if (val) sentences.push(`Bạn ${val} vào muộn`);
-            }
-
-            let part1Text = "";
-            if (sentences.length > 0) {
-                part1Text = "1. " + sentences.join(". ") + ".";
-            }
-
-            // Part 2: Reminders
-            let part2Text = "";
-            const reminderCheckboxes = document.querySelectorAll('input[name="reminder"]:checked');
-            if (reminderCheckboxes.length > 0) {
-                const reminders = Array.from(reminderCheckboxes).map(cb => cb.value).join(", ");
-                part2Text = `2. PH nhớ nhắc các em hoàn thành ${reminders}.`;
-            }
-
-            // Combine
-            const finalOutput = [part1Text, part2Text].filter(t => t).join("\n\n");
-
-            if (!finalOutput) {
-                alert('Vui lòng chọn ít nhất một thông tin để tạo feedback!');
-                return;
-            }
-
-            lessonPromptOutput.textContent = finalOutput;
-            lessonOutputSection.classList.remove('hidden');
-            lessonOutputSection.scrollIntoView({ behavior: 'smooth' });
-        });
-
-        if (lessonCopyBtn) {
-            lessonCopyBtn.addEventListener('click', () => copyToClipboard(lessonPromptOutput, lessonCopyBtn));
-        }
-    }
-
-
-    // --- Group Feedback Logic ---
     const groupGenerateBtn = document.getElementById('groupGenerateBtn');
+
     if (groupGenerateBtn) {
         // Data / Config
         const MAX_STUDENTS = 6;
@@ -155,17 +38,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const studentsContainer = document.getElementById('studentsContainer');
         const studentCountInput = document.getElementById('studentCountInput');
         const studentCountDisplay = document.getElementById('studentCountDisplay');
-        const navBadge = document.getElementById('navBadge');
 
         const knowledgeGroupContainer = document.getElementById('knowledgeGroupContainer');
         const attitudeGroupContainer = document.getElementById('attitudeGroupContainer');
-        const groupFabRefresh = document.getElementById('groupFabRefresh');
         const groupCopyBtn = document.getElementById('groupCopyBtn');
         const groupPromptOutput = document.getElementById('groupPromptOutput');
         const groupOutputSection = document.getElementById('groupOutputSection');
-
-        // Functions defined inside to access state (or could be external with state param)
-        // For simplicity, keeping structure similar to before but cleaner scoping.
 
         function renderStudentInputs() {
             studentsContainer.innerHTML = '';
@@ -414,7 +292,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const val = parseInt(e.target.value);
             groupState.studentCount = val;
             studentCountDisplay.textContent = val;
-            if (navBadge) navBadge.textContent = val;
             renderStudentInputs();
             renderGroupKnowledge();
             renderGroupAttitude();
@@ -512,89 +389,6 @@ Yêu cầu output (Thân thiện, nhẹ nhàng, từ ngữ đơn giản, KHÔNG 
             groupCopyBtn.addEventListener('click', () => copyToClipboard(groupPromptOutput, groupCopyBtn));
         }
 
-        // Refresh
-        groupFabRefresh.addEventListener('click', () => {
-            if (confirm('Bạn có chắc chắn muốn làm mới tất cả thông tin nhóm (bao gồm nội dung bài học và danh sách học sinh)?')) {
-                const lessonInput = document.getElementById('groupLessonContent');
-                if (lessonInput) lessonInput.value = '';
-                groupState.students = Array.from({ length: MAX_STUDENTS }, () => ({
-                    name: '', scores: {}, attitudes: []
-                }));
-                groupState.students.forEach(s => { CRITERIA_LIST.forEach(c => s.scores[c] = 8); });
 
-                groupState.studentCount = 4;
-                const countInput = document.getElementById('studentCountInput');
-                const countDisplay = document.getElementById('studentCountDisplay');
-                if (countInput) countInput.value = 4;
-                if (countDisplay) countDisplay.textContent = 4;
-                if (navBadge) navBadge.textContent = 4;
-
-                groupState.schoolLevel = 'TH';
-                const levelTh = document.getElementById('level_th');
-                if (levelTh) levelTh.checked = true;
-
-                groupPromptOutput.textContent = '';
-                groupOutputSection.classList.add('hidden');
-                renderStudentInputs();
-                renderGroupKnowledge();
-                renderGroupAttitude();
-            }
-        });
     }
-
-
-    // --- Shared Utilities ---
-    document.querySelectorAll('input[type="range"]').forEach(attachSliderWheelEvent);
-
-    const autoExpandTextareas = document.querySelectorAll('.auto-expand');
-    autoExpandTextareas.forEach(textarea => {
-        textarea.addEventListener('input', autoResizeTextarea);
-        autoResizeTextarea({ target: textarea });
-    });
-
-}); // End DOMContentLoaded
-
-// --- Global Utilities ---
-function autoResizeTextarea(e) {
-    const textarea = e.target;
-    textarea.style.height = 'auto';
-    textarea.style.height = textarea.scrollHeight + 'px';
-}
-function attachSliderWheelEvent(slider) {
-    const container = slider.parentElement;
-    if (container) {
-        container.classList.add('slider-interaction-area');
-        container.addEventListener('wheel', (e) => {
-            if (slider.disabled) return;
-            e.preventDefault();
-            const delta = Math.sign(e.deltaY) * -1;
-            const currentVal = parseInt(slider.value);
-            const min = parseInt(slider.min) || 0;
-            const max = parseInt(slider.max) || 10;
-            const step = parseInt(slider.step) || 1;
-            let newVal = currentVal + (delta * step);
-            if (newVal > max) newVal = max;
-            if (newVal < min) newVal = min;
-            if (newVal !== currentVal) {
-                slider.value = newVal;
-                slider.dispatchEvent(new Event('input'));
-            }
-        }, { passive: false });
-    }
-}
-
-function copyToClipboard(element, button) {
-    const textToCopy = element.textContent;
-    navigator.clipboard.writeText(textToCopy).then(() => {
-        const originalText = button.textContent;
-        button.textContent = 'Copied!';
-        button.classList.add('primary');
-        setTimeout(() => {
-            button.textContent = originalText;
-            button.classList.remove('primary');
-        }, 2000);
-    }).catch(err => {
-        console.error('Failed to copy: ', err);
-        alert('Không thể copy. Vui lòng chọn và copy thủ công.');
-    });
-}
+});

@@ -83,17 +83,9 @@
                         </div>
                     </section>
 
-                    <button type="button" id="lessonGenerateBtn" class="btn primary">Tạo Feedback</button>
-
-                    <!-- Floating Refresh Button -->
-                    <button type="button" id="lessonFabRefresh" class="fab-refresh" title="Làm mới tất cả">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="23 4 23 10 17 10"></polyline>
-                            <polyline points="1 20 1 14 7 14"></polyline>
-                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-                        </svg>
-                    </button>
+                    <div class="action-buttons">
+                        <button type="button" id="lessonGenerateBtn" class="btn primary">Tạo Feedback</button>
+                    </div>
                 </form>
 
                 <section id="lessonOutputSection" class="card hidden">
@@ -134,9 +126,6 @@
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                     <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                 </svg>
-                <div id="navBadge"
-                    style="position:absolute; bottom: 5px; right: 5px; font-size: 0.6rem; font-weight: bold; background: var(--primary-color); color: white; border-radius: 50%; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center;">
-                    4</div>
                 <span class="nav-label">Học sinh</span>
             </a>
 
@@ -146,12 +135,12 @@
                     <input type="checkbox" id="themeToggleCheckbox">
                     <span class="slider round"></span>
                 </label>
-                <span class="nav-label theme-icon"></span>
             </div>
         </nav>
     </div>
 
-    <script src="../scripts/script.js"></script>
+    <script src="../scripts/utils.js"></script>
+    <script src="../scripts/lesson.js"></script>
 </body>
 
 </html>
