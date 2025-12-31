@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edupia Feedback - Học sinh</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="background-blobs"></div>
+
+    <div class="app-container">
+        <!-- Main Content Area (Pages) -->
+        <main class="main-content">
+            <header>
+                <div class="header-content">
+                    <h1>Edupia Feedback Prompt Generator</h1>
+                </div>
+                <p id="pageDescription">Tạo prompt phản hồi cho học sinh (1-6 bạn)</p>
+            </header>
+
+            <!-- PAGE 3: GROUP FEEDBACK (4 STUDENTS) -->
+            <div id="page-group-feedback" class="page-section active">
+                <form id="groupFeedbackForm">
+                    <!-- Class Info -->
+                    <section class="card">
+                        <h2>Thông tin chung</h2>
+                        <div class="form-group">
+                            <label for="groupLessonContent">Nội dung bài học</label>
+                            <textarea id="groupLessonContent" class="auto-expand" rows="2"
+                                placeholder="Ví dụ: Unit 5: Animals..." required></textarea>
+                        </div>
+                    </section>
+
+                    <!-- Student Info -->
+                    <section class="card">
+                        <div class="section-header-row">
+                            <h2>Danh sách học sinh</h2>
+                            <div class="toggle-container">
+                                <span class="toggle-label">Cấp học:</span>
+                                <div class="switch-toggle">
+                                    <input type="radio" id="level_th" name="school_level" value="TH" checked>
+                                    <label for="level_th">TH</label>
+                                    <input type="radio" id="level_thcs" name="school_level" value="THCS">
+                                    <label for="level_thcs">THCS</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 2rem;">
+                            <div class="feedback-row" style="margin-bottom: 0.5rem;">
+                                <label for="studentCountInput" style="margin-bottom: 0;">Số lượng học sinh:</label>
+                                <span id="studentCountDisplay"
+                                    style="font-weight: bold; color: var(--primary-color);">4</span>
+                            </div>
+                            <input type="range" id="studentCountInput" min="1" max="6" value="4" style="width: 100%;">
+                        </div>
+
+                        <div id="studentsContainer" class="students-grid">
+                            <!-- JS will render student name inputs here -->
+                        </div>
+                    </section>
+
+                    <!-- Knowledge Section -->
+                    <section class="card">
+                        <div class="section-header-row">
+                            <h2>Tiếp thu kiến thức</h2>
+                            <div class="toggle-container">
+                                <span class="toggle-label">Chế độ:</span>
+                                <div class="switch-toggle">
+                                    <input type="radio" id="know_bulk" name="know_mode" value="bulk">
+                                    <label for="know_bulk">Đồng loạt</label>
+                                    <input type="radio" id="know_indi" name="know_mode" value="individual" checked>
+                                    <label for="know_indi">Từng bạn</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="knowledgeGroupContainer" class="group-criteria-container">
+                            <!-- JS will render content here based on mode -->
+                        </div>
+                    </section>
+
+                    <!-- Attitude Section -->
+                    <section class="card">
+                        <div class="section-header-row">
+                            <h2>Thái độ học tập</h2>
+                            <div class="toggle-container">
+                                <span class="toggle-label">Chế độ:</span>
+                                <div class="switch-toggle">
+                                    <input type="radio" id="att_bulk" name="att_mode" value="bulk">
+                                    <label for="att_bulk">Đồng loạt</label>
+                                    <input type="radio" id="att_indi" name="att_mode" value="individual" checked>
+                                    <label for="att_indi">Từng bạn</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="attitudeGroupContainer" class="group-attitude-container">
+                            <!-- JS will render content here based on mode -->
+                        </div>
+                    </section>
+
+                    <div class="action-buttons">
+                        <button type="button" id="groupGenerateBtn" class="btn primary">Tạo Feedback</button>
+                    </div>
+
+                    <!-- Floating Refresh Button -->
+                    <button type="button" id="groupFabRefresh" class="fab-refresh" title="Làm mới tất cả">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <polyline points="1 20 1 14 7 14"></polyline>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                    </button>
+                </form>
+
+                <section id="groupOutputSection" class="card hidden">
+                    <div class="output-header">
+                        <h2>Generated Group Prompts</h2>
+                        <button type="button" id="groupCopyBtn" class="btn secondary">Copy All</button>
+                    </div>
+                    <pre><code id="groupPromptOutput"></code></pre>
+                </section>
+            </div>
+        </main>
+
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar-nav">
+            <a href="../index.html" class="nav-item" title="Trang chủ">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                <span class="nav-label">Home</span>
+            </a>
+
+            <a href="lesson.html" class="nav-item" title="Nhận xét buổi học">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                </svg>
+                <span class="nav-label">Buổi học</span>
+            </a>
+
+            <a href="#" class="nav-item active" title="Học sinh">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                <div id="navBadge"
+                    style="position:absolute; bottom: 5px; right: 5px; font-size: 0.6rem; font-weight: bold; background: var(--primary-color); color: white; border-radius: 50%; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center;">
+                    4</div>
+                <span class="nav-label">Học sinh</span>
+            </a>
+
+            <!-- Theme Toggle in Sidebar -->
+            <div class="nav-item theme-switch-container" title="Chế độ tối/sáng">
+                <label class="switch">
+                    <input type="checkbox" id="themeToggleCheckbox">
+                    <span class="slider round"></span>
+                </label>
+                <span class="nav-label theme-icon"></span>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Initialize script with data-page attribute or similar logic if needed, 
+         but for now script.js runs on load. 
+         Ideally script.js should detect page elements. -->
+    <script src="../scripts/script.js"></script>
+</body>
+
+</html>

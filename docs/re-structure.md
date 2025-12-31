@@ -1,0 +1,14 @@
+The folder structure of this project is a mess. Fix it as follows:
+- docs
+    - prompts.md
+    - re-structure.md
+- pages 
+    - lesson.html
+    - students.html
+- index.html
+- scripts
+    - script.js
+- css
+    - style.css
+- images
+    - favicon.svg       
