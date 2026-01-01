@@ -45,6 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const groupPromptOutput = document.getElementById('groupPromptOutput');
         const groupOutputSection = document.getElementById('groupOutputSection');
 
+        let dragSrcEl = null;
+
         function renderStudentInputs() {
             studentsContainer.innerHTML = '';
             studentsContainer.style.gridTemplateColumns = `repeat(${groupState.studentCount}, 1fr)`;
@@ -52,8 +54,21 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let i = 0; i < groupState.studentCount; i++) {
                 const div = document.createElement('div');
                 div.className = 'form-group';
+                div.draggable = true; // Make draggable
+                div.dataset.index = i; // Store index
+
+                // Drag Events
+                div.addEventListener('dragstart', handleDragStart);
+                div.addEventListener('dragenter', handleDragEnter);
+                div.addEventListener('dragover', handleDragOver);
+                div.addEventListener('dragleave', handleDragLeave);
+                div.addEventListener('drop', handleDrop);
+                div.addEventListener('dragend', handleDragEnd);
+
                 const label = document.createElement('label');
                 label.textContent = `Học sinh ${i + 1}`;
+                label.style.cursor = 'grab'; // Visual cue
+
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.id = `s${i + 1}_name`;
@@ -64,10 +79,76 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (groupState.knowledgeMode === 'individual') renderGroupKnowledge();
                     if (groupState.attitudeMode === 'individual') renderGroupAttitude();
                 });
+
+                // Prevent drag processing when interacting with input text
+                input.addEventListener('mousedown', (e) => {
+                    div.draggable = false;
+                });
+                input.addEventListener('mouseup', (e) => {
+                    div.draggable = true;
+                });
+                input.addEventListener('mouseleave', (e) => {
+                    div.draggable = true;
+                });
+
+
                 div.appendChild(label);
                 div.appendChild(input);
                 studentsContainer.appendChild(div);
             }
+        }
+
+        // --- Drag and Drop Handlers ---
+        function handleDragStart(e) {
+            dragSrcEl = this;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', this.dataset.index);
+            this.classList.add('draggable-source');
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDragEnter(e) {
+            this.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+
+            if (dragSrcEl !== this) {
+                const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                const toIndex = parseInt(this.dataset.index);
+
+                // Swap data in state
+                const temp = groupState.students[fromIndex];
+                groupState.students[fromIndex] = groupState.students[toIndex];
+                groupState.students[toIndex] = temp;
+
+                // Re-render everything
+                renderStudentInputs();
+                renderGroupKnowledge();
+                renderGroupAttitude();
+            }
+            return false;
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('draggable-source');
+            document.querySelectorAll('.students-grid .form-group').forEach(item => {
+                item.classList.remove('drag-over');
+            });
         }
 
         function renderGroupKnowledge() {
