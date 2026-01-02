@@ -1,0 +1,507 @@
+"use client";
+
+import { useState, useRef, useEffect } from "react";
+import { copyToClipboard, cn } from "@/lib/utils";
+
+// --- Constants ---
+const MAX_STUDENTS = 6;
+const CRITERIA_LIST = [
+    "Từ vựng",
+    "Ngữ pháp",
+    "Ngữ âm",
+    "Đọc hiểu",
+    "Nghe hiểu",
+    "Phản xạ",
+    "Phát âm",
+];
+
+const ATTITUDE_DATA: Record<string, string[]> = {
+    "Năng lượng / Tinh thần": [
+        "tích cực",
+        "sôi nổi",
+        "vui vẻ",
+        "hứng thú",
+        "tự tin",
+        "lạc quan",
+        "mệt mỏi",
+        "chán nản",
+        "trầm tính",
+        "tự ti",
+        "xấu hổ",
+        "ngại nói",
+    ],
+    "Khả năng tập trung": [
+        "tập trung nghe giảng",
+        "chú ý bài học",
+        "tích cực phát biểu",
+        "sao nhãng",
+        "làm việc riêng",
+        "không tập trung",
+        "lơ là",
+    ],
+    "Thái độ với bạn học": [
+        "hòa đồng",
+        "biết chia sẻ",
+        "giúp đỡ bạn bè",
+        "nóng nảy",
+        "chưa hòa đồng",
+    ],
+    "Thái độ với giáo viên": [
+        "biết nghe lời",
+        "lễ phép",
+        "ngoan ngoãn",
+        "chưa vâng lời",
+        "phải nhắc nhở nhiều",
+    ],
+};
+
+const ATTITUDE_CATEGORIES = Object.keys(ATTITUDE_DATA);
+
+// --- Types ---
+interface Student {
+    id: number; // useful for keys
+    name: string;
+    scores: Record<string, number>;
+    attitudes: string[];
+}
+
+export default function StudentsPage() {
+    // --- State ---
+    const [lessonContent, setLessonContent] = useState("");
+    const [studentCount, setStudentCount] = useState(4);
+    const [schoolLevel, setSchoolLevel] = useState<"TH" | "THCS">("TH");
+
+    const [knowledgeMode, setKnowledgeMode] = useState<"bulk" | "individual">("individual");
+    const [attitudeMode, setAttitudeMode] = useState<"bulk" | "individual">("individual");
+
+    const [includedCriteria, setIncludedCriteria] = useState<string[]>([
+        "Từ vựng",
+        "Ngữ pháp",
+        "Phản xạ",
+    ]);
+    const [includedAttitudeCategories, setIncludedAttitudeCategories] = useState<string[]>(
+        ATTITUDE_CATEGORIES
+    );
+
+    // Initialize students
+    const [students, setStudents] = useState<Student[]>(() => {
+        return Array.from({ length: MAX_STUDENTS }, (_, i) => ({
+            id: i,
+            name: "",
+            scores: CRITERIA_LIST.reduce((acc, c) => ({ ...acc, [c]: 8 }), {}),
+            attitudes: [],
+        }));
+    });
+
+    const [output, setOutput] = useState("");
+    const [showOutput, setShowOutput] = useState(false);
+    const [copyBtnText, setCopyBtnText] = useState("Copy All");
+
+    // Drag State
+    const dragItem = useRef<number | null>(null);
+    const dragOverItem = useRef<number | null>(null);
+
+    // --- Handlers ---
+
+    const handleStudentNameChange = (index: number, value: string) => {
+        const newStudents = [...students];
+        newStudents[index].name = value;
+        setStudents(newStudents);
+    };
+
+    const handleScoreChange = (criteria: string, val: number, studentIndex?: number) => {
+        const newStudents = [...students];
+        if (knowledgeMode === "bulk") {
+            newStudents.forEach((s) => (s.scores[criteria] = val));
+        } else if (studentIndex !== undefined) {
+            newStudents[studentIndex].scores[criteria] = val;
+        }
+        setStudents(newStudents);
+    };
+
+    const handleAttitudeChange = (tag: string, checked: boolean, studentIndex?: number) => {
+        const newStudents = [...students];
+
+        if (attitudeMode === "bulk") {
+            newStudents.forEach((s) => {
+                if (checked) {
+                    if (!s.attitudes.includes(tag)) s.attitudes.push(tag);
+                } else {
+                    s.attitudes = s.attitudes.filter(t => t !== tag);
+                }
+            });
+        } else if (studentIndex !== undefined) {
+            const s = newStudents[studentIndex];
+            if (checked) {
+                if (!s.attitudes.includes(tag)) s.attitudes.push(tag);
+            } else {
+                s.attitudes = s.attitudes.filter(t => t !== tag);
+            }
+        }
+        setStudents(newStudents);
+    };
+
+    // Drag Handlers
+    const handleDragStart = (e: React.DragEvent, position: number) => {
+        dragItem.current = position;
+        // e.dataTransfer.effectAllowed = "move"; // Not strict in React
+    };
+
+    const handleDragEnter = (e: React.DragEvent, position: number) => {
+        dragOverItem.current = position;
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        if (dragItem.current !== null && dragOverItem.current !== null && dragItem.current !== dragOverItem.current) {
+            const newStudents = [...students];
+            const draggedItemContent = newStudents[dragItem.current];
+            newStudents.splice(dragItem.current, 1);
+            newStudents.splice(dragOverItem.current, 0, draggedItemContent);
+            setStudents(newStudents);
+        }
+        dragItem.current = null;
+        dragOverItem.current = null;
+    };
+
+    const isValidPositive = (tag: string) => {
+        return [
+            'tích cực', 'sôi nổi', 'vui vẻ', 'hứng thú', 'tự tin', 'lạc quan',
+            'tập trung nghe giảng', 'chú ý bài học', 'tích cực phát biểu',
+            'hòa đồng', 'biết chia sẻ', 'giúp đỡ bạn bè',
+            'biết nghe lời', 'lễ phép', 'ngoan ngoãn'
+        ].includes(tag);
+    };
+
+    const isValidNegative = (tag: string) => {
+        return [
+            'mệt mỏi', 'chán nản', 'trầm tính', 'tự ti', 'xấu hổ', 'ngại nói',
+            'sao nhãng', 'làm việc riêng', 'không tập trung', 'lơ là',
+            'nóng nảy', 'chưa hòa đồng', 'chưa vâng lời', 'phải nhắc nhở nhiều'
+        ].includes(tag);
+    };
+
+
+    const generateFeedback = () => {
+        if (!lessonContent.trim()) {
+            alert("Vui lòng nhập nội dung bài học!");
+            return;
+        }
+
+        const prompts: string[] = [];
+        const pronounInstruction = schoolLevel === 'THCS'
+            ? "Dùng đại từ 'em' để gọi học sinh."
+            : "Dùng đại từ 'con' để gọi học sinh.";
+
+        for (let i = 0; i < studentCount; i++) {
+            const student = students[i];
+            const name = student.name.trim() || `Học sinh ${i + 1}`;
+
+            let criteriaText = "";
+            if (includedCriteria.length > 0) {
+                criteriaText = includedCriteria.map(c => `- ${c}: ${student.scores[c]}/10`).join('\n');
+            } else {
+                criteriaText = "- (Không có nhận xét về kiến thức)";
+            }
+
+            const attitudeText = student.attitudes.length > 0 ? student.attitudes.map(a => `- ${a}`).join('\n') : '- (Không ghi nhận đặc biệt)';
+
+            const prompt = `### Feedback cho học sinh: ${name}
+
+Hãy đóng vai trò là một giáo viên tiếng Anh thân thiện, nhẹ nhàng và chuyên nghiệp. Dựa trên thông tin dưới đây, hãy viết một đoạn nhận xét ngắn gọn (khoảng 50-100 chữ) bằng tiếng Việt dành cho phụ huynh. Sử dụng từ ngữ đơn giản, dễ hiểu, tránh dùng từ chuyên ngành khó hiểu.
+${pronounInstruction}
+
+Thông tin:
+- Tên: ${name}
+- Bài học: ${lessonContent}
+
+Kết quả (Thang 10):
+${criteriaText}
+
+Thái độ:
+${attitudeText}
+
+Yêu cầu output (Thân thiện, nhẹ nhàng, từ ngữ đơn giản, KHÔNG chào hỏi/động viên sáo rỗng, TUYỆT ĐỐI KHÔNG nhắc đến điểm số):
+1. **Tiếp thu kiến thức**:
+\`\`\`plaintext
+[Nội dung nhận xét kiến thức cho ${name}]
+\`\`\`
+
+2. **Thái độ học tập**:
+\`\`\`plaintext
+[Nội dung nhận xét thái độ cho ${name}]
+\`\`\`
+`.trim();
+            prompts.push(prompt);
+        }
+
+        setOutput(prompts.join('\n\n' + '='.repeat(40) + '\n\n'));
+        setShowOutput(true);
+        setTimeout(() => {
+            document.getElementById("groupOutputSection")?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+    };
+
+    return (
+        <div className="animate-fade-in space-y-8 pb-20">
+            <form onSubmit={(e) => { e.preventDefault(); generateFeedback(); }}>
+
+                {/* Class Info */}
+                <section className="glass-panel p-8">
+                    <h2 className="text-2xl font-bold mb-6 text-[var(--text-main)] border-b-2 border-indigo-500/10 pb-2">Thông tin chung</h2>
+                    <div className="mb-4">
+                        <label htmlFor="groupLessonContent" className="block mb-2 font-medium">Nội dung bài học</label>
+                        <textarea
+                            id="groupLessonContent"
+                            className="w-full p-3 border border-gray-300 rounded-[var(--radius-md)] bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] transition-all min-h-[50px] resize-y shadow-sm"
+                            rows={2}
+                            placeholder="Ví dụ: Unit 5: Animals..."
+                            value={lessonContent}
+                            onChange={(e) => setLessonContent(e.target.value)}
+                            required
+                        ></textarea>
+                    </div>
+                </section>
+
+                {/* Student Info */}
+                <section className="glass-panel p-8 mt-8">
+                    <div className="flex justify-between items-center mb-6 pb-2 border-b-2 border-indigo-500/10">
+                        <h2 className="text-2xl font-bold m-0 p-0 text-[var(--text-main)]">Danh sách học sinh</h2>
+                        <div className="flex items-center gap-3 text-sm">
+                            <span className="font-semibold text-[var(--text-secondary)]">Cấp học:</span>
+                            <div className="flex bg-black/5 rounded-[20px] p-[3px] shadow-inner dark:bg-white/10">
+                                {['TH', 'THCS'].map((level) => (
+                                    <label key={level} className={`px-3 py-1 cursor-pointer rounded-[16px] text-sm font-semibold transition-all ${schoolLevel === level ? 'bg-[var(--primary-color)] text-white shadow-sm' : 'text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5'}`}>
+                                        <input type="radio" name="school_level" className="hidden"
+                                            checked={schoolLevel === level}
+                                            onChange={() => setSchoolLevel(level as any)}
+                                        />
+                                        {level}
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mb-8">
+                        <div className="flex items-center gap-4 mb-2">
+                            <label htmlFor="studentCountInput" className="font-medium m-0">Số lượng học sinh:</label>
+                            <span className="font-bold text-[var(--primary-color)] text-lg">{studentCount}</span>
+                        </div>
+                        <input
+                            type="range"
+                            id="studentCountInput"
+                            min="1"
+                            max="6"
+                            value={studentCount}
+                            onChange={(e) => setStudentCount(Number(e.target.value))}
+                            className="w-full h-[6px] bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[var(--primary-color)]"
+                        />
+                    </div>
+
+                    <div className={`grid gap-4`} style={{ gridTemplateColumns: `repeat(${studentCount}, minmax(0, 1fr))` }}>
+                        {students.slice(0, studentCount).map((student, index) => (
+                            <div
+                                key={student.id}
+                                className="mb-4 relative group"
+                                draggable
+                                onDragStart={(e) => handleDragStart(e, index)}
+                                onDragEnter={(e) => handleDragEnter(e, index)}
+                                onDragEnd={() => { dragItem.current = null; dragOverItem.current = null; }}
+                                onDrop={handleDrop}
+                                onDragOver={(e) => e.preventDefault()}
+                            >
+                                <label className="block mb-2 font-medium cursor-grab active:cursor-grabbing text-sm">Học sinh {index + 1}</label>
+                                <input
+                                    type="text"
+                                    className="w-full p-2 border border-gray-300 rounded-[var(--radius-md)] bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] transition-all text-sm shadow-sm"
+                                    placeholder={`Tên HS ${index + 1}`}
+                                    value={student.name}
+                                    onChange={(e) => handleStudentNameChange(index, e.target.value)}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* Knowledge Section */}
+                <section className="glass-panel p-8 mt-8">
+                    <div className="flex justify-between items-center mb-6 pb-2 border-b-2 border-indigo-500/10 flex-wrap gap-4">
+                        <h2 className="text-2xl font-bold m-0 p-0 text-[var(--text-main)]">Tiếp thu kiến thức</h2>
+                        <div className="flex items-center gap-3 text-sm">
+                            <span className="font-semibold text-[var(--text-secondary)]">Chế độ:</span>
+                            <div className="flex bg-black/5 rounded-[20px] p-[3px] shadow-inner dark:bg-white/10">
+                                <label className={`px-3 py-1 cursor-pointer rounded-[16px] text-sm font-semibold transition-all ${knowledgeMode === 'bulk' ? 'bg-[var(--primary-color)] text-white shadow-sm' : 'text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5'}`}>
+                                    <input type="radio" name="know_mode" className="hidden" onChange={() => setKnowledgeMode('bulk')} checked={knowledgeMode === 'bulk'} />
+                                    Đồng loạt
+                                </label>
+                                <label className={`px-3 py-1 cursor-pointer rounded-[16px] text-sm font-semibold transition-all ${knowledgeMode === 'individual' ? 'bg-[var(--primary-color)] text-white shadow-sm' : 'text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5'}`}>
+                                    <input type="radio" name="know_mode" className="hidden" onChange={() => setKnowledgeMode('individual')} checked={knowledgeMode === 'individual'} />
+                                    Từng bạn
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Criteria Selection */}
+                    <div className="flex flex-wrap gap-2 mb-8 pb-4 border-b border-indigo-500/10">
+                        {CRITERIA_LIST.map(criteria => (
+                            <label key={criteria} className={`inline-block px-3 py-1 rounded-full border cursor-pointer select-none text-xs ${includedCriteria.includes(criteria) ? "bg-[var(--primary-color)] text-white border-[var(--primary-color)] shadow-sm" : "bg-white/50 border-gray-200/50 dark:bg-gray-700/50 dark:hover:bg-gray-600"}`}>
+                                <input type="checkbox" className="hidden"
+                                    checked={includedCriteria.includes(criteria)}
+                                    onChange={(e) => {
+                                        if (e.target.checked) setIncludedCriteria([...includedCriteria, criteria]);
+                                        else setIncludedCriteria(includedCriteria.filter(c => c !== criteria));
+                                    }}
+                                />
+                                {criteria}
+                            </label>
+                        ))}
+                    </div>
+
+                    {/* Sliders Grid */}
+                    <div className="space-y-6">
+                        {CRITERIA_LIST.filter(c => includedCriteria.includes(c)).map(criteria => (
+                            <div key={criteria} className="group-row">
+                                <h4 className="text-[var(--primary-color)] font-bold mb-2">{criteria}</h4>
+                                <div className={`grid gap-4 ${knowledgeMode === 'bulk' ? 'grid-cols-1' : ''}`} style={{ gridTemplateColumns: knowledgeMode === 'bulk' ? '1fr' : `repeat(${studentCount}, minmax(0, 1fr))` }}>
+                                    {(knowledgeMode === 'bulk' ? [0] : Array.from({ length: studentCount }, (_, i) => i)).map((i) => {
+                                        const val = students[i].scores[criteria];
+                                        return (
+                                            <div key={i} className="flex flex-col gap-1">
+                                                <label className="text-xs truncate font-medium text-[var(--text-secondary)]">
+                                                    {knowledgeMode === 'bulk' ? "Tất cả học sinh" : (students[i].name || `HS ${i + 1}`)}
+                                                </label>
+                                                <div className="flex items-center gap-2">
+                                                    <input
+                                                        type="range" min="1" max="10"
+                                                        value={val}
+                                                        onChange={(e) => handleScoreChange(criteria, Number(e.target.value), i)}
+                                                        className="w-full h-[6px] bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[var(--primary-color)]"
+                                                    />
+                                                    <span className="font-bold text-[var(--primary-color)] w-[20px] text-right">{val}</span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* Attitude Section */}
+                <section className="glass-panel p-8 mt-8">
+                    <div className="flex justify-between items-center mb-6 pb-2 border-b-2 border-indigo-500/10 flex-wrap gap-4">
+                        <h2 className="text-2xl font-bold m-0 p-0 text-[var(--text-main)]">Thái độ học tập</h2>
+                        <div className="flex items-center gap-3 text-sm">
+                            <span className="font-semibold text-[var(--text-secondary)]">Chế độ:</span>
+                            <div className="flex bg-black/5 rounded-[20px] p-[3px] shadow-inner dark:bg-white/10">
+                                <label className={`px-3 py-1 cursor-pointer rounded-[16px] text-sm font-semibold transition-all ${attitudeMode === 'bulk' ? 'bg-[var(--primary-color)] text-white shadow-sm' : 'text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5'}`}>
+                                    <input type="radio" name="att_mode" className="hidden" onChange={() => setAttitudeMode('bulk')} checked={attitudeMode === 'bulk'} />
+                                    Đồng loạt
+                                </label>
+                                <label className={`px-3 py-1 cursor-pointer rounded-[16px] text-sm font-semibold transition-all ${attitudeMode === 'individual' ? 'bg-[var(--primary-color)] text-white shadow-sm' : 'text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5'}`}>
+                                    <input type="radio" name="att_mode" className="hidden" onChange={() => setAttitudeMode('individual')} checked={attitudeMode === 'individual'} />
+                                    Từng bạn
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Category Selection */}
+                    <div className="flex flex-wrap gap-2 mb-8 pb-4 border-b border-indigo-500/10">
+                        {ATTITUDE_CATEGORIES.map(cat => (
+                            <label key={cat} className={`inline-block px-3 py-1 rounded-full border cursor-pointer select-none text-xs ${includedAttitudeCategories.includes(cat) ? "bg-[var(--primary-color)] text-white border-[var(--primary-color)] shadow-sm" : "bg-white/50 border-gray-200/50 dark:bg-gray-700/50 dark:hover:bg-gray-600"}`}>
+                                <input type="checkbox" className="hidden"
+                                    checked={includedAttitudeCategories.includes(cat)}
+                                    onChange={(e) => {
+                                        if (e.target.checked) setIncludedAttitudeCategories([...includedAttitudeCategories, cat]);
+                                        else setIncludedAttitudeCategories(includedAttitudeCategories.filter(c => c !== cat));
+                                    }}
+                                />
+                                {cat}
+                            </label>
+                        ))}
+                    </div>
+
+                    {/* Attitude Grid */}
+                    <div className="space-y-8">
+                        {ATTITUDE_CATEGORIES.filter(c => includedAttitudeCategories.includes(c)).map(category => (
+                            <div key={category}>
+                                <h4 className="text-[var(--text-secondary)] font-bold mb-3 text-lg">{category}</h4>
+                                <div className={`grid gap-4 ${attitudeMode === 'bulk' ? 'grid-cols-1' : ''}`} style={{ gridTemplateColumns: attitudeMode === 'bulk' ? '1fr' : `repeat(${studentCount}, minmax(0, 1fr))` }}>
+                                    {(attitudeMode === 'bulk' ? [0] : Array.from({ length: studentCount }, (_, i) => i)).map((i) => (
+                                        <div key={i} className="flex flex-col gap-2">
+                                            {!((attitudeMode === 'bulk')) && (
+                                                <div className="text-xs font-bold text-center text-[var(--text-main)] mb-1">
+                                                    {students[i].name || `HS ${i + 1}`}
+                                                </div>
+                                            )}
+                                            <div className="flex flex-wrap gap-1 justify-center">
+                                                {ATTITUDE_DATA[category].map(tag => {
+                                                    const isPos = isValidPositive(tag);
+                                                    const isNeg = isValidNegative(tag);
+                                                    const isChecked = students[i].attitudes.includes(tag);
+
+                                                    return (
+                                                        <label key={tag} className={`inline-block px-2 py-1 rounded-[12px] border cursor-pointer select-none text-[0.7rem] transition-all 
+                                                      ${isChecked
+                                                                ? (isPos ? 'bg-green-500 border-green-500 text-white shadow-sm' : (isNeg ? 'bg-red-500 border-red-500 text-white shadow-sm' : 'bg-[var(--primary-color)] border-[var(--primary-color)] text-white shadow-sm'))
+                                                                : 'bg-white border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700'
+                                                            }
+                                                  `}>
+                                                            <input type="checkbox" className="hidden"
+                                                                checked={isChecked}
+                                                                onChange={(e) => handleAttitudeChange(tag, e.target.checked, i)}
+                                                            />
+                                                            {tag}
+                                                        </label>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                <div className="flex justify-center mt-8">
+                    <button
+                        type="submit"
+                        className="px-8 py-3 rounded-lg bg-[var(--primary-color)] text-white font-semibold transform hover:-translate-y-0.5 hover:bg-[var(--primary-hover)] shadow-lg hover:shadow-xl transition-all"
+                    >
+                        Tạo Feedback
+                    </button>
+                </div>
+
+            </form>
+
+            {/* Output */}
+            {showOutput && (
+                <section id="groupOutputSection" className="glass-panel p-8 mt-8 animate-fade-in">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-xl font-bold">Generated Group Prompts</h2>
+                        <button
+                            type="button"
+                            onClick={() => copyToClipboard(output, () => {
+                                setCopyBtnText("Copied!");
+                                setTimeout(() => setCopyBtnText("Copy All"), 2000);
+                            })}
+                            className={`px-4 py-2 rounded-lg border border-[var(--primary-color)] text-[var(--primary-color)] hover:bg-indigo-50 dark:hover:bg-indigo-900/20 font-medium transition-colors ${copyBtnText === "Copied!" ? "!bg-[var(--primary-color)] !text-white" : ""
+                                }`}
+                        >
+                            {copyBtnText}
+                        </button>
+                    </div>
+                    <pre className="bg-[#1e1e2e] text-[#e2e8f0] p-6 rounded-lg overflow-x-auto font-mono text-sm whitespace-pre-wrap border border-gray-700 max-h-[600px] overflow-y-auto">
+                        {output}
+                    </pre>
+                </section>
+            )}
+
+        </div>
+    );
+}

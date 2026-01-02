@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-be-vietnam-pro);
+  --font-mono: monospace;
+
+  /* Ported Colors */
+  --color-primary: var(--primary-color);
+  --color-primary-hover: var(--primary-hover);
+  --color-glass-bg: var(--glass-bg);
+  --color-glass-border: var(--glass-border);
+  --color-text-main: var(--text-main);
+  --color-text-secondary: var(--text-secondary);
+
+  /* Ported Shadows & Radius */
+  --shadow-custom-lg: var(--shadow-lg);
+  --radius-lg: var(--radius-lg);
+  --radius-md: var(--radius-md);
+}
+
+:root {
+  color-scheme: dark;
+  --background: #ffffff;
+  --foreground: #171717;
+
+  /* Legacy Variables */
+  --primary-color: #6366f1;
+  --primary-hover: #4f46e5;
+  --bg-gradient-1: #c7d2fe;
+  --bg-gradient-2: #e0e7ff;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  --text-main: #1f2937;
+  --text-secondary: #4b5563;
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --radius-lg: 1rem;
+  --radius-md: 0.5rem;
+  --sidebar-width: 80px;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+.dark {
+  color-scheme: dark;
+  --primary-color: #818cf8;
+  --primary-hover: #6366f1;
+  --bg-gradient-1: #111827;
+  --bg-gradient-2: #1f2937;
+  --glass-bg: rgba(31, 41, 55, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --text-main: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+}
+
+body {
+  background: linear-gradient(135deg, var(--bg-gradient-1), var(--bg-gradient-2));
+  color: var(--text-main);
+  font-family: var(--font-be-vietnam-pro), sans-serif;
+  min-height: 100vh;
+}
+
+/* Utilities not covered by Tailwind directly or custom helpers */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
