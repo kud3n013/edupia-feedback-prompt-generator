@@ -4,8 +4,12 @@ import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { useState, FormEvent, ChangeEvent } from "react";
 
-export const Auth = () => {
-    const [isSignUp, setIsSignUp] = useState(false);
+interface AuthProps {
+    initialView?: 'login' | 'signup';
+}
+
+export const Auth = ({ initialView = 'login' }: AuthProps) => {
+    const [isSignUp, setIsSignUp] = useState(initialView === 'signup');
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [fullName, setFullName] = useState("");
@@ -37,9 +41,8 @@ export const Auth = () => {
                 } else if (data.user && !data.session) {
                     setMessage({ text: "Tài khoản đã được tạo! Vui lòng kiểm tra email để xác nhận.", type: 'success' });
                 } else {
-                    setMessage({ text: "Đăng ký thành công!", type: 'success' });
-                    router.refresh();
-                    router.push('/students');
+                    setMessage({ text: "Đăng ký thành công! Đang chuyển hướng...", type: 'success' });
+                    window.location.href = '/';
                 }
             } else {
                 const { error } = await supabase.auth.signInWithPassword({
@@ -50,8 +53,8 @@ export const Auth = () => {
                 if (error) {
                     setMessage({ text: "Đăng nhập thất bại: " + error.message, type: 'error' });
                 } else {
-                    router.refresh();
-                    router.push('/students');
+                    setMessage({ text: "Đăng nhập thành công! Đang chuyển hướng...", type: 'success' });
+                    window.location.href = '/';
                 }
             }
         } catch (err) {
