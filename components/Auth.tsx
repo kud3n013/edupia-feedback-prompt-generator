@@ -13,6 +13,7 @@ export const Auth = ({ initialView = 'login' }: AuthProps) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [fullName, setFullName] = useState("");
+    const [gender, setGender] = useState<string>("");
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ text: string; type: 'error' | 'success' } | null>(null);
 
@@ -26,12 +27,31 @@ export const Auth = ({ initialView = 'login' }: AuthProps) => {
 
         try {
             if (isSignUp) {
+                if (!fullName.trim()) {
+                    setMessage({ text: "Vui lòng nhập họ và tên!", type: 'error' });
+                    setLoading(false);
+                    return;
+                }
+
+                if (!email.trim()) {
+                    setMessage({ text: "Vui lòng nhập email!", type: 'error' });
+                    setLoading(false);
+                    return;
+                }
+
+                if (!gender) {
+                    setMessage({ text: "Vui lòng chọn giới tính!", type: 'error' });
+                    setLoading(false);
+                    return;
+                }
+
                 const { data, error } = await supabase.auth.signUp({
                     email,
                     password,
                     options: {
                         data: {
                             full_name: fullName || email.split('@')[0],
+                            gender: gender,
                         },
                     },
                 });
@@ -75,24 +95,54 @@ export const Auth = ({ initialView = 'login' }: AuthProps) => {
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 {isSignUp && (
-                    <div>
-                        <label className="block text-sm font-medium mb-2" htmlFor="fullName">
-                            Họ và tên
-                        </label>
-                        <input
-                            id="fullName"
-                            type="text"
-                            placeholder="Nguyễn Văn A"
-                            value={fullName}
-                            onChange={(e) => setFullName(e.target.value)}
-                            className="w-full p-3 rounded-lg border border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[var(--primary-color)] focus:border-transparent outline-none transition-all shadow-sm"
-                        />
-                    </div>
+                    <>
+                        <div>
+                            <label className="block text-sm font-medium mb-2" htmlFor="fullName">
+                                Họ và tên <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                id="fullName"
+                                type="text"
+                                placeholder="Nguyễn Văn A"
+                                value={fullName}
+                                onChange={(e) => setFullName(e.target.value)}
+                                className="w-full p-3 rounded-lg border border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[var(--primary-color)] focus:border-transparent outline-none transition-all shadow-sm"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Giới tính <span className="text-red-500">*</span></label>
+                            <div className="flex gap-4">
+                                <label className={`flex-1 p-3 rounded-lg border cursor-pointer transition-all flex items-center justify-center gap-2 ${gender === 'male' ? 'bg-[var(--primary-color)] text-white border-[var(--primary-color)]' : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 hover:border-[var(--primary-color)]'}`}>
+                                    <input
+                                        type="radio"
+                                        name="gender"
+                                        value="male"
+                                        checked={gender === 'male'}
+                                        onChange={(e) => setGender(e.target.value)}
+                                        className="hidden"
+                                    />
+                                    <span className="text-lg">♂️</span> Nam
+                                </label>
+                                <label className={`flex-1 p-3 rounded-lg border cursor-pointer transition-all flex items-center justify-center gap-2 ${gender === 'female' ? 'bg-pink-500 text-white border-pink-500' : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 hover:border-pink-500'}`}>
+                                    <input
+                                        type="radio"
+                                        name="gender"
+                                        value="female"
+                                        checked={gender === 'female'}
+                                        onChange={(e) => setGender(e.target.value)}
+                                        className="hidden"
+                                    />
+                                    <span className="text-lg">♀️</span> Nữ
+                                </label>
+                            </div>
+                        </div>
+                    </>
                 )}
 
                 <div>
                     <label className="block text-sm font-medium mb-2" htmlFor="email">
-                        Email
+                        Email <span className="text-red-500">*</span>
                     </label>
                     <input
                         id="email"
@@ -107,7 +157,7 @@ export const Auth = ({ initialView = 'login' }: AuthProps) => {
 
                 <div>
                     <label className="block text-sm font-medium mb-2" htmlFor="password">
-                        Mật khẩu
+                        Mật khẩu <span className="text-red-500">*</span>
                     </label>
                     <input
                         id="password"

@@ -44,8 +44,10 @@ export default async function Home() {
             </div>
 
             <div className="flex-1 min-w-0 z-10">
-              <h3 className="text-lg font-bold truncate text-[var(--text-main)]">
+              <h3 className="text-lg font-bold truncate text-[var(--text-main)] flex items-center gap-2">
                 {user.user_metadata.full_name || "Xin chào!"}
+                {user.user_metadata.gender === 'male' && <span className="text-blue-500 text-base" title="Nam">♂️</span>}
+                {user.user_metadata.gender === 'female' && <span className="text-pink-500 text-base" title="Nữ">♀️</span>}
               </h3>
               <p className="text-sm text-[var(--text-secondary)] truncate">
                 {user.email}

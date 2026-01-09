@@ -82,13 +82,25 @@ export default function StudentsPage() {
         "Phản xạ",
     ]);
     const [isDesktop, setIsDesktop] = useState(false);
+    const [gender, setGender] = useState<string>("");
 
     useEffect(() => {
         const checkDesktop = () => {
             setIsDesktop(window.innerWidth >= 768); // md breakpoint
         };
 
+        // Fetch user gender
+        const fetchUserGender = async () => {
+            const { createClient } = await import("@/utils/supabase/client");
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user?.user_metadata?.gender) {
+                setGender(user.user_metadata.gender);
+            }
+        };
+
         checkDesktop();
+        fetchUserGender();
         window.addEventListener('resize', checkDesktop);
         return () => window.removeEventListener('resize', checkDesktop);
     }, []);
@@ -227,9 +239,13 @@ export default function StudentsPage() {
         }
 
         const prompts: string[] = [];
-        const pronounInstruction = schoolLevel === 'THCS'
-            ? "Dùng đại từ 'em' để gọi học sinh."
-            : "Dùng đại từ 'con' để gọi học sinh.";
+        const studentPronoun = schoolLevel === 'THCS' ? "em" : "con";
+
+        let teacherPronoun = "Thầy/Cô";
+        if (gender === 'male') teacherPronoun = "Thầy";
+        if (gender === 'female') teacherPronoun = "Cô";
+
+        const pronounInstruction = `Dùng đại từ '${studentPronoun}' để gọi học sinh và xưng hô là '${teacherPronoun}'.`;
 
         for (let i = 0; i < studentCount; i++) {
             const student = students[i];
@@ -246,7 +262,7 @@ export default function StudentsPage() {
 
             const prompt = `### Feedback cho học sinh: ${name}
 
-Hãy đóng vai trò là một giáo viên tiếng Anh thân thiện, nhẹ nhàng và chuyên nghiệp. Dựa trên thông tin dưới đây, hãy viết một đoạn nhận xét ngắn gọn (khoảng 50-100 chữ) bằng tiếng Việt dành cho phụ huynh. Sử dụng từ ngữ đơn giản, dễ hiểu, tránh dùng từ chuyên ngành khó hiểu.
+Hãy đóng vai trò là một ${teacherPronoun} giáo tiếng Anh thân thiện, nhẹ nhàng và chuyên nghiệp. Dựa trên thông tin dưới đây, hãy viết một đoạn nhận xét ngắn gọn (khoảng 50-100 chữ) bằng tiếng Việt dành cho phụ huynh. Sử dụng từ ngữ đơn giản, dễ hiểu, tránh dùng từ chuyên ngành khó hiểu.
 ${pronounInstruction}
 
 Thông tin:
