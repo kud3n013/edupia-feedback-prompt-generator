@@ -6,6 +6,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { Background } from "@/components/Background";
 import { createClient } from "@/utils/supabase/server";
 import { SmoothScrolling } from "@/components/SmoothScrolling";
+import { FaviconManager } from "@/components/FaviconManager";
 
 const beVietnamPro = Be_Vietnam_Pro({
   weight: ["400", "500", "600", "700"],
@@ -34,6 +35,7 @@ export default async function RootLayout({
         className={`${beVietnamPro.variable} font-sans antialiased`}
       >
         <SmoothScrolling />
+        <FaviconManager />
         <div className="flex min-h-screen relative pr-[var(--sidebar-width)] max-sm:flex-col max-sm:pr-0 max-sm:pb-[60px]">
           <Background />
           {/* Main Content Area */}
