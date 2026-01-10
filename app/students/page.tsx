@@ -262,7 +262,7 @@ export default function StudentsPage() {
 
             const prompt = `### Feedback cho học sinh: ${name}
 
-Hãy đóng vai trò là một ${teacherPronoun} giáo tiếng Anh thân thiện, nhẹ nhàng và chuyên nghiệp. Dựa trên thông tin dưới đây, hãy viết một đoạn nhận xét ngắn gọn (khoảng 50-100 chữ) bằng tiếng Việt dành cho phụ huynh. Sử dụng từ ngữ đơn giản, dễ hiểu, tránh dùng từ chuyên ngành khó hiểu.
+Hãy đóng vai trò là một ${teacherPronoun} giáo tiếng Anh. Dựa trên thông tin dưới đây, hãy viết một đoạn nhận xét ngắn gọn (khoảng 25-50 chữ) bằng tiếng Việt dành cho phụ huynh. Sử dụng ngôn ngữ trực tiếp, thẳng thắn, không dùng lời khen sáo rỗng hay chỉ trích gay gắt.
 ${pronounInstruction}
 
 Thông tin:
@@ -275,7 +275,7 @@ ${criteriaText}
 Thái độ:
 ${attitudeText}
 
-Yêu cầu output (Thân thiện, nhẹ nhàng, từ ngữ đơn giản, KHÔNG chào hỏi/động viên sáo rỗng, TUYỆT ĐỐI KHÔNG nhắc đến điểm số):
+Yêu cầu output (Trực tiếp, thẳng thắn, không khen sáo rỗng, không chỉ trích gay gắt, TUYỆT ĐỐI KHÔNG nhắc đến điểm số):
 1. **Tiếp thu kiến thức**:
 \`\`\`plaintext
 [Nội dung nhận xét kiến thức cho ${name}]
