@@ -39,7 +39,7 @@ export function LoginRequirementModal({ isOpen, onClose }: LoginRequirementModal
                             Để sau
                         </button>
                         <Link
-                            href="/login"
+                            href="/auth/login"
                             onClick={onClose}
                             className="flex-1 px-4 py-2 rounded-lg bg-[var(--primary-color)] text-white font-medium hover:bg-[var(--primary-hover)] transition-colors text-center shadow-lg shadow-indigo-500/20"
                         >

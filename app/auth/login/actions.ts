@@ -16,7 +16,7 @@ export async function login(formData: FormData) {
     })
 
     if (error) {
-        redirect('/login?error=Invalid login credentials')
+        redirect('/auth/login?error=Invalid login credentials')
     }
 
     revalidatePath('/', 'layout')
@@ -41,11 +41,11 @@ export async function signup(formData: FormData) {
     })
 
     if (error) {
-        redirect(`/signup?error=${error.message}`)
+        redirect(`/auth/signup?error=${error.message}`)
     }
 
     if (data.user && !data.session) {
-        redirect('/login?message=Account created! Please check your email to confirm your account.')
+        redirect('/auth/login?message=Account created! Please check your email to confirm your account.')
     }
 
     revalidatePath('/', 'layout')
@@ -55,5 +55,5 @@ export async function signup(formData: FormData) {
 export async function signOut() {
     const supabase = await createClient()
     await supabase.auth.signOut()
-    redirect('/login')
+    redirect('/auth/login')
 }

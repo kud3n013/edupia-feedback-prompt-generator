@@ -1,5 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
-import { signOut } from "./login/actions";
+import { signOut } from "./auth/login/actions";
 import Link from "next/link";
 import { HomeMenu } from "@/components/HomeMenu";
 
@@ -63,13 +63,13 @@ export default async function Home() {
         ) : (
           <div className="flex gap-4">
             <Link
-              href="/login"
+              href="/auth/login"
               className="px-6 py-3 rounded-full bg-[var(--primary-color)] text-white font-semibold shadow-lg hover:shadow-[var(--primary-color)]/30 hover:-translate-y-1 transition-all"
             >
               Đăng nhập
             </Link>
             <Link
-              href="/signup"
+              href="/auth/signup"
               className="px-6 py-3 rounded-full border border-[var(--primary-color)] text-[var(--primary-color)] font-semibold hover:bg-[var(--primary-color)]/10 transition-all"
             >
               Tạo tài khoản
